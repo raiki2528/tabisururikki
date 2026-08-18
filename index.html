@@ -183,6 +183,7 @@
             <svg
               id="japan-map"
               viewBox="0 0 760 520"
+              preserveAspectRatio="xMidYMid meet"
               role="img"
               aria-label="訪問済み都道府県を示す日本地図"
             ></svg>
@@ -425,13 +426,16 @@
           </li>
           <li>
             <span>2</span>
-            <div><strong>OFUSEで支援する</strong><p>支援付きレター画面で金額を調整して送ります。</p></div>
+            <div>
+              <strong>OFUSEまたはPayPayで支援する</strong>
+              <p>OFUSEのレター画面、またはPayPayのQRコード・リンクから送ります。</p>
+            </div>
           </li>
           <li>
             <span>3</span>
             <div>
               <strong>Instagramで知らせる</strong>
-              <p>DMで支援額とOFUSEで使った名前を送ってください。</p>
+              <p>DMで支援額と、OFUSEで使った名前（またはPayPayで支援した旨）を送ってください。</p>
             </div>
           </li>
         </ol>
@@ -441,8 +445,36 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          人生が変わる旅を応援する ↗
+          OFUSEで旅を応援する ↗
         </a>
+        <div class="paypay-block reveal" data-paypay-block>
+          <p class="paypay-label">または PayPay で支援</p>
+          <p class="paypay-note">
+            QRコードを読み取るか、ボタンから送金してください。支援後はInstagramのDMでお知らせください。
+          </p>
+          <div class="paypay-grid">
+            <a class="paypay-qr-link" data-paypay-link href="https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn">
+              <img
+                data-paypay-qr
+                src="./media/paypay-qr.jpg"
+                alt="PayPayで支援するQRコード"
+                width="240"
+                height="240"
+                loading="lazy"
+              />
+            </a>
+            <div class="paypay-actions">
+              <a
+                class="button button-outline paypay-button"
+                data-paypay-link
+                href="https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn"
+              >
+                PayPayで支援する ↗
+              </a>
+              <p class="paypay-expiry">QRコードの有効期限が切れたら、新しい画像に差し替えてください。</p>
+            </div>
+          </div>
+        </div>
         <a
           class="dm-link"
           href="https://www.instagram.com/tabisururikki.62/"

@@ -5,14 +5,17 @@
  * 「ウェブに公開 → CSV」で公開し、そのURLを googleSheetCsvUrl に入れてください。
  *
  * 対応するkey:
- * currentAmount / currentLocation / deadline
+ * currentAmount / currentLocation / deadline / paypayUrl / paypayQrImage
  */
 window.SITE_DATA = {
   goalAmount: 300000,
   currentAmount: 0,
   currentLocation: "東京",
   deadline: "2026-08-31",
-  googleSheetCsvUrl: "",
+  googleSheetCsvUrl:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vSNSfjEYnqttbeO3h0TgX8vqGGCAzNCMEXPDgnVXyq-vuFX71queRfXn1I4FJGlxBVAuEzGU5yVmuWt/pub?gid=0&single=true&output=csv",
+  paypayUrl: "https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn",
+  paypayQrImage: "./media/paypay-qr.jpg",
 
   // 都道府県コード（JIS X 0401）
   visitedPrefectureCodes: [

@@ -628,7 +628,6 @@ h2 {
 
 .map-frame {
   position: relative;
-  min-height: 580px;
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -638,7 +637,7 @@ h2 {
 #japan-map {
   display: block;
   width: 100%;
-  min-height: 500px;
+  height: auto;
 }
 
 #japan-map path {
@@ -1177,6 +1176,69 @@ h2 {
   color: var(--brown);
 }
 
+.paypay-block {
+  width: 100%;
+  margin-top: 2.5rem;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  text-align: left;
+}
+
+.paypay-label {
+  margin-bottom: 0.45rem;
+  color: var(--brown);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.paypay-note {
+  margin-bottom: 1.25rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.paypay-grid {
+  display: grid;
+  align-items: center;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.paypay-qr-link {
+  display: block;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 0.2rem);
+  background: var(--paper);
+}
+
+.paypay-qr-link img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0.35rem;
+}
+
+.paypay-actions {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.paypay-button {
+  justify-self: start;
+}
+
+.paypay-expiry {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
 .final-message {
   padding: 10rem 2rem;
   color: var(--white);
@@ -1538,12 +1600,7 @@ footer > p {
   }
 
   .map-frame {
-    min-height: 320px;
     padding: 0.25rem;
-  }
-
-  #japan-map {
-    min-height: 290px;
   }
 
   .map-legend {
@@ -1627,6 +1684,26 @@ footer > p {
 
   .support-flow h2 {
     font-size: clamp(1.55rem, 6.5vw, 2rem);
+  }
+
+  .paypay-block {
+    margin-top: 2rem;
+    padding: 1.35rem;
+  }
+
+  .paypay-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .paypay-qr-link {
+    max-width: 220px;
+    margin: 0 auto;
+  }
+
+  .paypay-button {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .support-flow .button-large {

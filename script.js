@@ -135,6 +135,7 @@ async function loadSheetData() {
     };
     updateStatus(siteData);
     renderMap(siteData);
+    setupPayPay(siteData);
   } catch (error) {
     console.warn("Googleスプレッドシートのデータを取得できませんでした。初期値を表示します。", error);
   }
@@ -163,6 +164,36 @@ function findPrefectureCode(name) {
   return Number(
     Object.entries(PREFECTURES).find(([, prefectureName]) => prefectureName === name)?.[0] || 0,
   );
+}
+
+function fitMapViewBox(svg) {
+  const paths = svg.querySelectorAll("path");
+  if (paths.length === 0) return;
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  paths.forEach((path) => {
+    const box = path.getBBox();
+    minX = Math.min(minX, box.x);
+    minY = Math.min(minY, box.y);
+    maxX = Math.max(maxX, box.x + box.width);
+    maxY = Math.max(maxY, box.y + box.height);
+  });
+
+  const padding = 14;
+  svg.setAttribute(
+    "viewBox",
+    [
+      (minX - padding).toFixed(2),
+      (minY - padding).toFixed(2),
+      (maxX - minX + padding * 2).toFixed(2),
+      (maxY - minY + padding * 2).toFixed(2),
+    ].join(" "),
+  );
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 }
 
 async function renderMap(data) {
@@ -206,6 +237,7 @@ async function renderMap(data) {
     });
 
     svg.replaceChildren(fragment);
+    fitMapViewBox(svg);
     svg.dataset.loaded = "true";
     document.querySelector("[data-visited-count]").textContent = String(visited.size);
     if (loading) loading.remove();
@@ -341,6 +373,29 @@ function setupGallery() {
   renderGallery();
 }
 
+function setupPayPay(data) {
+  const block = document.querySelector("[data-paypay-block]");
+  const url = data.paypayUrl;
+  const qrImage = data.paypayQrImage;
+
+  if (!block || !url) {
+    block?.remove();
+    return;
+  }
+
+  block.querySelectorAll("[data-paypay-link]").forEach((link) => {
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+  });
+
+  const qr = block.querySelector("[data-paypay-qr]");
+  if (qr && qrImage) {
+    qr.src = qrImage;
+    qr.alt = "PayPayで支援するQRコード";
+  }
+}
+
 document.querySelectorAll(".support-link").forEach((link) => {
   link.target = "_blank";
   link.rel = "noopener noreferrer";
@@ -348,6 +403,7 @@ document.querySelectorAll(".support-link").forEach((link) => {
 
 updateStatus(siteData);
 renderMap(siteData);
+setupPayPay(siteData);
 loadSheetData();
 setupRevealAnimations();
 setupGallery();
