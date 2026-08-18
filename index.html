@@ -17,8 +17,20 @@
     <meta property="og:image" content="./media/hero.jpg" />
     <title>旅する リッキー｜高校生ヒッチハイク日本一周</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <script src="./site-data.js" defer></script>
     <script src="./pref-data.js" defer></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+      defer
+    ></script>
     <script src="./script.js" defer></script>
   </head>
   <body>
@@ -39,7 +51,7 @@
           Instagram
         </a>
         <a
-          class="button button-small button-dark header-support"
+          class="button button-small button-dark header-support support-action"
           href="https://ofuse.me/b738fbb7/letter"
           target="_blank"
           rel="noopener noreferrer"
@@ -63,7 +75,7 @@
           </p>
           <div class="hero-actions">
             <a
-              class="button button-primary"
+              class="button button-primary support-action"
               href="https://ofuse.me/b738fbb7/letter"
               target="_blank"
               rel="noopener noreferrer"
@@ -180,13 +192,11 @@
 
         <div class="map-layout">
           <div class="map-frame">
-            <svg
-              id="japan-map"
-              viewBox="0 0 760 520"
-              preserveAspectRatio="xMidYMid meet"
+            <div
+              id="japan-map-leaflet"
               role="img"
               aria-label="訪問済み都道府県を示す日本地図"
-            ></svg>
+            ></div>
             <p class="map-loading" data-map-loading>地図を読み込んでいます…</p>
             <div class="map-legend">
               <span><i class="legend-current"></i>現在地</span>
@@ -199,6 +209,18 @@
             <strong data-current-location>東京</strong>
             <span>安全のため、現在地は都道府県単位・移動後に更新します。</span>
           </aside>
+        </div>
+        <div class="pref-panel reveal">
+          <div class="pref-panel-section">
+            <p class="pref-panel-label">現在地</p>
+            <div class="pref-chip-list pref-chip-list-current">
+              <span class="pref-chip current" data-current-chip>東京</span>
+            </div>
+          </div>
+          <div class="pref-panel-section">
+            <p class="pref-panel-label">訪問済み <strong data-visited-count>37</strong> 都道府県</p>
+            <div class="pref-chip-list" data-pref-chip-list aria-live="polite"></div>
+          </div>
         </div>
         <p class="map-credit">
           地図データ：国土地理院ウェブサイトをもとに作成された
@@ -265,10 +287,46 @@
             <h2>あなたらしい距離で、<br />旅の仲間になってください。</h2>
           </div>
           <p>
-            OFUSEで金額を選び、支援後にInstagramのDMで
-            「支援額」と「OFUSEで使った名前」をお知らせください。
+            支援前にInstagramのユーザー名を入力してください。支援後のリターン連絡に使います。
           </p>
         </div>
+
+        <div class="support-gate reveal" data-support-gate>
+          <p class="support-gate-label">STEP 0 — 必須</p>
+          <h3>Instagramのユーザー名を入力してください</h3>
+          <p class="support-gate-note">
+            支援後にリターンをお届けするため、@ユーザー名が必要です。入力するまで支援ボタンは使えません。
+          </p>
+          <form class="support-gate-form" data-instagram-form>
+            <label class="instagram-field">
+              <span>Instagram ユーザー名</span>
+              <div class="instagram-input-wrap">
+                <span class="instagram-at" aria-hidden="true">@</span>
+                <input
+                  type="text"
+                  data-instagram-input
+                  placeholder="your_name"
+                  autocomplete="username"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  required
+                  pattern="[A-Za-z0-9._]{1,30}"
+                  maxlength="30"
+                />
+              </div>
+            </label>
+            <button type="submit" class="button button-primary">入力して支援へ進む</button>
+          </form>
+          <div class="support-gate-success" data-instagram-success hidden>
+            <p>
+              ✅ <strong data-instagram-display></strong> で登録しました。下のプランから支援できます。
+            </p>
+            <button type="button" class="text-link" data-instagram-change>ユーザー名を変更する</button>
+          </div>
+        </div>
+        <p class="support-locked-notice" data-support-locked>
+          ↑ 先にInstagramユーザー名を入力してください
+        </p>
 
         <div class="return-list">
           <article class="return-card reveal">
@@ -282,7 +340,7 @@
                 <li>本人からのお礼メッセージ</li>
               </ul>
             </div>
-            <a class="button button-outline support-link" href="https://ofuse.me/b738fbb7/letter">
+            <a class="button button-outline support-link support-action" href="https://ofuse.me/b738fbb7/letter">
               このプランで応援
             </a>
           </article>
@@ -298,7 +356,7 @@
                 <li>悩み、葛藤、出会いの記録</li>
               </ul>
             </div>
-            <a class="button button-outline support-link" href="https://ofuse.me/b738fbb7/letter">
+            <a class="button button-outline support-link support-action" href="https://ofuse.me/b738fbb7/letter">
               このプランで応援
             </a>
           </article>
@@ -315,7 +373,7 @@
                 <li>価値観が動いた瞬間の記録</li>
               </ul>
             </div>
-            <a class="button button-light support-link" href="https://ofuse.me/b738fbb7/letter">
+            <a class="button button-light support-link support-action" href="https://ofuse.me/b738fbb7/letter">
               このプランで応援
             </a>
           </article>
@@ -332,7 +390,7 @@
                 <li>次の挑戦をいち早く共有</li>
               </ul>
             </div>
-            <a class="button button-outline support-link" href="https://ofuse.me/b738fbb7/letter">
+            <a class="button button-outline support-link support-action" href="https://ofuse.me/b738fbb7/letter">
               このプランで応援
             </a>
           </article>
@@ -418,29 +476,36 @@
 
       <section class="support-flow section reveal" id="support">
         <p class="section-number">08 — HOW TO SUPPORT</p>
-        <h2>応援は、3ステップ。</h2>
+        <h2>応援は、4ステップ。</h2>
         <ol>
           <li>
             <span>1</span>
-            <div><strong>リターンを選ぶ</strong><p>あなたに合う応援プランを選びます。</p></div>
+            <div>
+              <strong>Instagramユーザー名を入力</strong>
+              <p>支援前に必ず @ユーザー名 を入力してください。</p>
+            </div>
           </li>
           <li>
             <span>2</span>
+            <div><strong>リターンを選ぶ</strong><p>あなたに合う応援プランを選びます。</p></div>
+          </li>
+          <li>
+            <span>3</span>
             <div>
               <strong>OFUSEまたはPayPayで支援する</strong>
               <p>OFUSEのレター画面、またはPayPayのQRコード・リンクから送ります。</p>
             </div>
           </li>
           <li>
-            <span>3</span>
+            <span>4</span>
             <div>
               <strong>Instagramで知らせる</strong>
-              <p>DMで支援額と、OFUSEで使った名前（またはPayPayで支援した旨）を送ってください。</p>
+              <p>DMで「@ユーザー名 です、○○円支援しました」と送ってください。</p>
             </div>
           </li>
         </ol>
         <a
-          class="button button-primary button-large"
+          class="button button-primary button-large support-action"
           href="https://ofuse.me/b738fbb7/letter"
           target="_blank"
           rel="noopener noreferrer"
@@ -453,7 +518,11 @@
             QRコードを読み取るか、ボタンから送金してください。支援後はInstagramのDMでお知らせください。
           </p>
           <div class="paypay-grid">
-            <a class="paypay-qr-link" data-paypay-link href="https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn">
+            <a
+              class="paypay-qr-link support-action"
+              data-paypay-link
+              href="https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn"
+            >
               <img
                 data-paypay-qr
                 src="./media/paypay-qr.jpg"
@@ -465,7 +534,7 @@
             </a>
             <div class="paypay-actions">
               <a
-                class="button button-outline paypay-button"
+                class="button button-outline paypay-button support-action"
                 data-paypay-link
                 href="https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn"
               >

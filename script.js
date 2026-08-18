@@ -141,105 +141,112 @@ async function loadSheetData() {
   }
 }
 
-function project([longitude, latitude]) {
-  return [(longitude - 122) * 31, (46.4 - latitude) * 22.5];
+let leafletMap = null;
+let geoJsonLayer = null;
+let prefectureGeoJson = null;
+
+function getPrefectureStyle(code, visited, currentCode) {
+  if (code === currentCode) {
+    return {
+      fillColor: "#c45c26",
+      fillOpacity: 0.92,
+      color: "#ffffff",
+      weight: 2.5,
+    };
+  }
+  if (visited.has(code)) {
+    return {
+      fillColor: "#1a4d3a",
+      fillOpacity: 0.82,
+      color: "#ffffff",
+      weight: 1.8,
+    };
+  }
+  return {
+    fillColor: "#ece7df",
+    fillOpacity: 1,
+    color: "#b8b0a4",
+    weight: 1.2,
+  };
 }
 
-function ringToPath(ring) {
-  return ring
-    .map((coordinate, index) => {
-      const [x, y] = project(coordinate);
-      return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
-    })
-    .join(" ")
-    .concat(" Z");
-}
+function renderPrefectureChips(data) {
+  const chipList = document.querySelector("[data-pref-chip-list]");
+  const currentChip = document.querySelector("[data-current-chip]");
+  const visited = (data.visitedPrefectureCodes || []).map(Number);
+  const currentName = data.currentLocation || "旅の途中";
 
-function geometryToPath(geometry) {
-  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-  return polygons.flatMap((polygon) => polygon.map(ringToPath)).join(" ");
-}
+  if (currentChip) currentChip.textContent = currentName;
 
-function findPrefectureCode(name) {
-  return Number(
-    Object.entries(PREFECTURES).find(([, prefectureName]) => prefectureName === name)?.[0] || 0,
-  );
-}
+  if (!chipList) return;
 
-function fitMapViewBox(svg) {
-  const paths = svg.querySelectorAll("path");
-  if (paths.length === 0) return;
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  paths.forEach((path) => {
-    const box = path.getBBox();
-    minX = Math.min(minX, box.x);
-    minY = Math.min(minY, box.y);
-    maxX = Math.max(maxX, box.x + box.width);
-    maxY = Math.max(maxY, box.y + box.height);
-  });
-
-  const padding = 14;
-  svg.setAttribute(
-    "viewBox",
-    [
-      (minX - padding).toFixed(2),
-      (minY - padding).toFixed(2),
-      (maxX - minX + padding * 2).toFixed(2),
-      (maxY - minY + padding * 2).toFixed(2),
-    ].join(" "),
-  );
-  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  chipList.replaceChildren();
+  visited
+    .filter((code) => PREFECTURES[code] && PREFECTURES[code] !== currentName)
+    .sort((a, b) => a - b)
+    .forEach((code) => {
+      const chip = document.createElement("span");
+      chip.className = "pref-chip visited";
+      chip.textContent = PREFECTURES[code];
+      chipList.append(chip);
+    });
 }
 
 async function renderMap(data) {
-  const svg = document.querySelector("#japan-map");
+  const container = document.querySelector("#japan-map-leaflet");
   const loading = document.querySelector("[data-map-loading]");
-  if (!svg || svg.dataset.loaded === "true") {
-    if (svg) {
-      const currentCode = findPrefectureCode(data.currentLocation);
-      svg.querySelectorAll("path").forEach((path) => {
-        path.classList.toggle("current", Number(path.dataset.code) === currentCode);
-      });
-    }
-    return;
-  }
+  if (!container || typeof L === "undefined") return;
 
   try {
-    let geojson = window.PREFECTURE_GEOJSON;
-    if (!geojson) {
-      const response = await fetch("./pref.geojson");
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      geojson = await response.json();
+    if (!prefectureGeoJson) {
+      prefectureGeoJson = window.PREFECTURE_GEOJSON;
+      if (!prefectureGeoJson) {
+        const response = await fetch("./pref.geojson");
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        prefectureGeoJson = await response.json();
+      }
     }
+
     const visited = new Set((data.visitedPrefectureCodes || []).map(Number));
     const currentCode = findPrefectureCode(data.currentLocation);
-    const fragment = document.createDocumentFragment();
 
-    geojson.features.forEach((feature) => {
-      const code = Number(feature.properties.code);
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    if (!leafletMap) {
+      leafletMap = L.map(container, {
+        scrollWheelZoom: false,
+        zoomControl: true,
+        attributionControl: true,
+      });
 
-      path.setAttribute("d", geometryToPath(feature.geometry));
-      path.dataset.code = String(code);
-      path.classList.toggle("visited", visited.has(code));
-      path.classList.toggle("current", code === currentCode);
-      title.textContent = `${PREFECTURES[code] || feature.properties.name}${
-        code === currentCode ? "（現在地）" : visited.has(code) ? "（訪問済み）" : ""
-      }`;
-      path.append(title);
-      fragment.append(path);
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 10,
+        minZoom: 4,
+      }).addTo(leafletMap);
+    }
+
+    if (geoJsonLayer) {
+      leafletMap.removeLayer(geoJsonLayer);
+    }
+
+    geoJsonLayer = L.geoJSON(prefectureGeoJson, {
+      style: (feature) => getPrefectureStyle(Number(feature.properties.code), visited, currentCode),
+      onEachFeature: (feature, layer) => {
+        const code = Number(feature.properties.code);
+        const name = PREFECTURES[code] || feature.properties.name;
+        const status =
+          code === currentCode ? "現在地" : visited.has(code) ? "訪問済み" : "これから";
+        layer.bindPopup(`<strong>${name}</strong><br>${status}`);
+      },
+    }).addTo(leafletMap);
+
+    leafletMap.fitBounds(geoJsonLayer.getBounds(), { padding: [16, 16] });
+
+    document.querySelectorAll("[data-visited-count]").forEach((element) => {
+      element.textContent = String(visited.size);
     });
-
-    svg.replaceChildren(fragment);
-    fitMapViewBox(svg);
-    svg.dataset.loaded = "true";
-    document.querySelector("[data-visited-count]").textContent = String(visited.size);
+    renderPrefectureChips(data);
     if (loading) loading.remove();
   } catch (error) {
     if (loading) loading.textContent = "地図を読み込めませんでした。";
@@ -373,6 +380,115 @@ function setupGallery() {
   renderGallery();
 }
 
+function findPrefectureCode(name) {
+  return Number(
+    Object.entries(PREFECTURES).find(([, prefectureName]) => prefectureName === name)?.[0] || 0,
+  );
+}
+
+const INSTAGRAM_STORAGE_KEY = "riki_support_instagram";
+
+function normalizeInstagram(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^@+/, "")
+    .replace(/[^A-Za-z0-9._]/g, "");
+}
+
+function setSupportUnlocked(unlocked) {
+  document.querySelectorAll(".support-action").forEach((element) => {
+    element.classList.toggle("is-locked", !unlocked);
+    element.setAttribute("aria-disabled", unlocked ? "false" : "true");
+    if (element.tagName === "A") {
+      element.tabIndex = unlocked ? 0 : -1;
+    }
+  });
+
+  const lockedNotice = document.querySelector("[data-support-locked]");
+  if (lockedNotice) lockedNotice.hidden = unlocked;
+}
+
+async function logSupporterInstagram(username) {
+  const url = siteData.supporterLogUrl;
+  if (!url) return;
+
+  try {
+    await fetch(url, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ instagram: username, source: "support-gate" }),
+    });
+  } catch (error) {
+    console.warn("支援者ログの送信に失敗しました。", error);
+  }
+}
+
+function applyInstagramUsername(username) {
+  const normalized = normalizeInstagram(username);
+  const form = document.querySelector("[data-instagram-form]");
+  const success = document.querySelector("[data-instagram-success]");
+  const display = document.querySelector("[data-instagram-display]");
+  const input = document.querySelector("[data-instagram-input]");
+
+  if (!normalized) {
+    sessionStorage.removeItem(INSTAGRAM_STORAGE_KEY);
+    setSupportUnlocked(false);
+    form?.removeAttribute("hidden");
+    if (success) success.hidden = true;
+    return;
+  }
+
+  sessionStorage.setItem(INSTAGRAM_STORAGE_KEY, normalized);
+  if (input) input.value = normalized;
+  if (display) display.textContent = `@${normalized}`;
+  if (success) success.hidden = false;
+  form?.setAttribute("hidden", "hidden");
+  setSupportUnlocked(true);
+  logSupporterInstagram(normalized);
+}
+
+function setupSupportGate() {
+  const form = document.querySelector("[data-instagram-form]");
+  const input = document.querySelector("[data-instagram-input]");
+  const changeButton = document.querySelector("[data-instagram-change]");
+  if (!form || !input) return;
+
+  document.querySelectorAll(".support-action").forEach((element) => {
+    element.addEventListener("click", (event) => {
+      if (element.classList.contains("is-locked")) {
+        event.preventDefault();
+        document.querySelector("[data-support-gate]")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        input.focus();
+      }
+    });
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const username = normalizeInstagram(input.value);
+    if (!username) {
+      input.focus();
+      return;
+    }
+    applyInstagramUsername(username);
+  });
+
+  changeButton?.addEventListener("click", () => {
+    form.removeAttribute("hidden");
+    document.querySelector("[data-instagram-success]")?.setAttribute("hidden", "hidden");
+    setSupportUnlocked(false);
+    input.focus();
+  });
+
+  const saved = sessionStorage.getItem(INSTAGRAM_STORAGE_KEY);
+  if (saved) {
+    applyInstagramUsername(saved);
+  } else {
+    setSupportUnlocked(false);
+  }
+}
+
 function setupPayPay(data) {
   const block = document.querySelector("[data-paypay-block]");
   const url = data.paypayUrl;
@@ -404,6 +520,7 @@ document.querySelectorAll(".support-link").forEach((link) => {
 updateStatus(siteData);
 renderMap(siteData);
 setupPayPay(siteData);
+setupSupportGate();
 loadSheetData();
 setupRevealAnimations();
 setupGallery();

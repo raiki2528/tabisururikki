@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <base target="_top" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>旅リッキー サイト管理</title>
+    <style>
+      :root {
+        --green: #1a4d3a;
+        --green-light: #e6efe9;
+        --orange: #c45c26;
+        --ink: #111;
+        --muted: #666;
+        --line: rgba(17, 17, 17, 0.12);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        color: var(--ink);
+        background: linear-gradient(180deg, #f7f4ef 0%, #fff 240px);
+        font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+        line-height: 1.6;
+      }
+
+      .wrap {
+        max-width: 520px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+      }
+
+      .lead {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .card {
+        margin-bottom: 16px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: #fff;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 14px;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      input,
+      select {
+        display: block;
+        width: 100%;
+        margin-top: 6px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font: inherit;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px 16px;
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        background: var(--green);
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+
+      .status {
+        min-height: 1.2em;
+        margin-top: 12px;
+        font-size: 0.82rem;
+      }
+
+      .status.ok {
+        color: var(--green);
+      }
+
+      .status.error {
+        color: #b42318;
+      }
+
+      .preview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .preview-box {
+        padding: 14px;
+        border-radius: 14px;
+        background: var(--green-light);
+      }
+
+      .preview-box strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 1.2rem;
+      }
+
+      .preview-box.location strong {
+        color: var(--orange);
+        font-size: 1.5rem;
+      }
+
+      .hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>旅リッキー サイト管理</h1>
+      <p class="lead">支援金と現在地を更新すると、公開サイトに反映されます。</p>
+
+      <div class="card preview">
+        <div class="preview-box">
+          <span>現在の支援金</span>
+          <strong id="previewAmount">—</strong>
+        </div>
+        <div class="preview-box location">
+          <span>現在地</span>
+          <strong id="previewLocation">—</strong>
+        </div>
+      </div>
+
+      <form class="card" id="adminForm">
+        <label>
+          管理PIN
+          <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" required />
+        </label>
+
+        <label>
+          支援金合計（円）
+          <input id="currentAmount" type="number" min="0" step="1" inputmode="numeric" required />
+        </label>
+
+        <label>
+          現在地（都道府県）
+          <select id="currentLocation" required></select>
+        </label>
+
+        <button type="submit" id="saveButton">サイトに反映する</button>
+        <p class="status" id="status"></p>
+        <p class="hint">保存後、サイトを再読み込みすると最新の値が表示されます。</p>
+      </form>
+    </div>
+
+    <script>
+      const PREFECTURES = [
+        "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島",
+        "茨城", "栃木", "群馬", "埼玉", "千葉", "東京", "神奈川",
+        "新潟", "富山", "石川", "福井", "山梨", "長野", "岐阜", "静岡", "愛知",
+        "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山",
+        "鳥取", "島根", "岡山", "広島", "山口",
+        "徳島", "香川", "愛媛", "高知",
+        "福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄",
+      ];
+
+      const pinInput = document.getElementById("pin");
+      const amountInput = document.getElementById("currentAmount");
+      const locationSelect = document.getElementById("currentLocation");
+      const statusEl = document.getElementById("status");
+      const saveButton = document.getElementById("saveButton");
+      const previewAmount = document.getElementById("previewAmount");
+      const previewLocation = document.getElementById("previewLocation");
+
+      PREFECTURES.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        locationSelect.append(option);
+      });
+
+      function formatYen(value) {
+        return `${new Intl.NumberFormat("ja-JP").format(Number(value) || 0)}円`;
+      }
+
+      function setPreview(data) {
+        previewAmount.textContent = formatYen(data.currentAmount);
+        previewLocation.textContent = data.currentLocation || "—";
+        amountInput.value = data.currentAmount || 0;
+        locationSelect.value = data.currentLocation || "東京";
+      }
+
+      function setStatus(message, type) {
+        statusEl.textContent = message;
+        statusEl.className = `status ${type || ""}`;
+      }
+
+      function loadData() {
+        google.script.run
+          .withSuccessHandler((data) => {
+            setPreview(data);
+          })
+          .withFailureHandler((error) => {
+            setStatus(String(error.message || error), "error");
+          })
+          .getSiteData();
+      }
+
+      document.getElementById("adminForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveButton.disabled = true;
+        setStatus("保存中…", "");
+
+        google.script.run
+          .withSuccessHandler((result) => {
+            setPreview(result.data);
+            setStatus("保存しました。サイトを再読み込みして確認してください。", "ok");
+            saveButton.disabled = false;
+          })
+          .withFailureHandler((error) => {
+            setStatus(String(error.message || error), "error");
+            saveButton.disabled = false;
+          })
+          .saveFromAdmin({
+            pin: pinInput.value,
+            currentAmount: amountInput.value,
+            currentLocation: locationSelect.value,
+          });
+      });
+
+      loadData();
+    </script>
+  </body>
+</html>
