@@ -40,11 +40,9 @@ function doGet(e) {
   if (action === "logsupporter") {
     try {
       logSupporter_(e.parameter.instagram, e.parameter.source || "website");
-      return jsonResponse_({ ok: true })
-        .setHeader("Access-Control-Allow-Origin", "*");
+      return jsonResponse_({ ok: true });
     } catch (error) {
-      return jsonResponse_({ ok: false, error: String(error.message || error) })
-        .setHeader("Access-Control-Allow-Origin", "*");
+      return jsonResponse_({ ok: false, error: String(error.message || error) });
     }
   }
 
@@ -175,4 +173,10 @@ function jsonResponse_(payload) {
   return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
     ContentService.MimeType.JSON,
   );
+}
+
+/** Apps Script エディタから実行して supporters シートへの書き込みをテスト */
+function testLogSupporter() {
+  logSupporter_("manual_test", "gas-editor");
+  Logger.log("supporters シートに test 行を追加しました");
 }

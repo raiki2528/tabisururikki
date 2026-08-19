@@ -17,7 +17,12 @@ window.SITE_DATA = {
   paypayUrl: "https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn",
   paypayQrImage: "./media/paypay-qr.jpg",
   supporterLogUrl:
-    "https://script.google.com/macros/s/AKfycbw5iNloFyhgWWVWInC5-uxTNNmREu9ABNRO2RbmZGWKVMZEFZztIZKnp8U7qVcMnHNl/exec",
+    "https://script.google.com/macros/s/AKfycbx5eDYPZrfw1Ldo67uB8UTwA-O_wZV2lDo3NNIY3S1M-DZKUeAT2lfm47q50wUeEwS1/exec",
+
+  // Googleフォーム経由（GASが動かない場合の代替・推奨）
+  // formResponse の URL と entry ID を設定（gas/README.md 参照）
+  supporterFormAction: "",
+  supporterFormEntry: "",
 
   // Stripe Payment Links（ダッシュボードで作成した URL を貼る）
   // https://dashboard.stripe.com/payment-links

@@ -59,6 +59,61 @@ GitHub に push すると Vercel が再デプロイされます。
 
 #### 記録されないとき（重要）
 
+**確認結果（2026/8/19）:** 新しい GAS URL も **Google ログイン画面にリダイレクト** されています。  
+→ **「アクセス: 全員」になっていません。** これが記録されない直接の原因です。
+
+テスト URL（ブラウザで開く）:
+```
+https://script.google.com/macros/s/AKfycbx5eDYPZrfw1Ldo67uB8UTwA-O_wZV2lDo3NNIY3S1M-DZKUeAT2lfm47q50wUeEwS1/exec?action=logSupporter&instagram=test&source=support-gate
+```
+
+| 表示 | 意味 |
+|---|---|
+| `{"ok":true}` | ✅ OK |
+| Google ログイン画面 | ❌ デプロイ設定が間違い |
+
+**直し方（Apps Script）:**
+1. [スプレッドシート](https://docs.google.com/spreadsheets/d/1ZIc7VBcxDCOyj_o3QZ-Yqyk1uzZ61UYjBN0FPhgjQRQ/edit) → **拡張機能 → Apps Script**
+2. `Code.gs` を最新版に更新 → 保存
+3. エディタで `testLogSupporter` を選んで **実行**（初回は権限許可）→ スプレッドシートに `supporters` ができるか確認
+4. **デプロイ → デプロイを管理 → 鉛筆**
+5. **次のユーザーとして実行: 自分**
+6. **アクセスできるユーザー: 全員** ← 「組織内」「Googleアカウントを持つユーザー」ではない
+7. **新バージョン** → **デプロイ**
+
+---
+
+## 代替：Googleフォーム（GASが直らない場合・推奨）
+
+GAS の公開設定が難しい場合、**Googleフォーム**なら匿名でも確実に記録できます。
+
+### 1. フォームを作成
+
+1. [スプレッドシート](https://docs.google.com/spreadsheets/d/1ZIc7VBcxDCOyj_o3QZ-Yqyk1uzZ61UYjBN0FPhgjQRQ/edit) → **ツール → フォームを作成**
+2. 質問1: 「Instagramユーザー名」（記述式・必須）
+3. フォームの **回答** タブ → **スプレッドシートにリンク**（同じブックに）
+
+### 2. entry ID を取得
+
+1. フォーム編集画面 → 右上 **⋮** → **事前入力用の URL を取得**
+2. Instagram欄に `test` と入力 → URL をコピー
+3. URL から2つを控える:
+   - `https://docs.google.com/forms/d/e/XXXX/formResponse` → `supporterFormAction`
+   - `entry.1234567890` → `supporterFormEntry`
+
+### 3. site-data.js に設定
+
+```js
+supporterFormAction: "https://docs.google.com/forms/d/e/XXXX/formResponse",
+supporterFormEntry: "entry.1234567890",
+```
+
+push 後、サイトから入力するとフォーム回答シートに記録されます。
+
+---
+
+#### GAS で記録されないとき（旧メモ）
+
 **原因の9割：GAS のアクセス設定**
 
 テスト URL をブラウザで開く:

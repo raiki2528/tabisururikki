@@ -409,22 +409,41 @@ function setSupportUnlocked(unlocked) {
 }
 
 async function logSupporterInstagram(username) {
+  const normalized = normalizeInstagram(username);
+  if (!normalized) return;
+
+  // 方法A: Googleフォーム（匿名でも確実に動く）
+  if (siteData.supporterFormAction && siteData.supporterFormEntry) {
+    try {
+      const body = new URLSearchParams();
+      body.set(siteData.supporterFormEntry, normalized);
+      await fetch(siteData.supporterFormAction, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+      return;
+    } catch (error) {
+      console.warn("Googleフォームへの送信に失敗しました。", error);
+    }
+  }
+
+  // 方法B: GAS Webアプリ
   const baseUrl = siteData.supporterLogUrl;
   if (!baseUrl) return;
 
   const params = new URLSearchParams({
     action: "logSupporter",
-    instagram: username,
+    instagram: normalized,
     source: "support-gate",
   });
   const url = `${baseUrl}?${params.toString()}`;
 
-  // GET + 画像ビーコン（静的サイトから最も確実）
   const beacon = new Image();
   beacon.referrerPolicy = "no-referrer";
   beacon.src = url;
 
-  // 開発時のみ結果を確認できる（本番は no-cors でも可）
   try {
     const response = await fetch(url, { method: "GET", mode: "cors" });
     if (!response.ok) {
@@ -435,7 +454,7 @@ async function logSupporterInstagram(username) {
     if (!result.ok) console.warn("支援者ログ:", result.error);
   } catch (error) {
     console.warn(
-      "支援者ログの送信に失敗しました。GASの「アクセス: 全員」設定と再デプロイを確認してください。",
+      "GASへの記録に失敗しました。Googleフォーム設定（supporterFormAction）を使うか、GASの「アクセス: 全員」を確認してください。",
       error,
     );
   }
