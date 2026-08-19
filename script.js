@@ -417,14 +417,27 @@ async function logSupporterInstagram(username) {
     instagram: username,
     source: "support-gate",
   });
+  const url = `${baseUrl}?${params.toString()}`;
 
+  // GET + 画像ビーコン（静的サイトから最も確実）
+  const beacon = new Image();
+  beacon.referrerPolicy = "no-referrer";
+  beacon.src = url;
+
+  // 開発時のみ結果を確認できる（本番は no-cors でも可）
   try {
-    await fetch(`${baseUrl}?${params.toString()}`, {
-      method: "GET",
-      mode: "no-cors",
-    });
+    const response = await fetch(url, { method: "GET", mode: "cors" });
+    if (!response.ok) {
+      console.warn("支援者ログ: HTTP", response.status);
+      return;
+    }
+    const result = await response.json();
+    if (!result.ok) console.warn("支援者ログ:", result.error);
   } catch (error) {
-    console.warn("支援者ログの送信に失敗しました。", error);
+    console.warn(
+      "支援者ログの送信に失敗しました。GASの「アクセス: 全員」設定と再デプロイを確認してください。",
+      error,
+    );
   }
 }
 

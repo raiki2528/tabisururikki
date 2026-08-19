@@ -40,9 +40,11 @@ function doGet(e) {
   if (action === "logsupporter") {
     try {
       logSupporter_(e.parameter.instagram, e.parameter.source || "website");
-      return jsonResponse_({ ok: true });
+      return jsonResponse_({ ok: true })
+        .setHeader("Access-Control-Allow-Origin", "*");
     } catch (error) {
-      return jsonResponse_({ ok: false, error: String(error.message || error) });
+      return jsonResponse_({ ok: false, error: String(error.message || error) })
+        .setHeader("Access-Control-Allow-Origin", "*");
     }
   }
 

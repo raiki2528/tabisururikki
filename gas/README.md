@@ -57,6 +57,35 @@ GitHub に push すると Vercel が再デプロイされます。
 |---|---|---|
 | 2026/8/19 15:00:00 | someone_name | support-gate |
 
+#### 記録されないとき（重要）
+
+**原因の9割：GAS のアクセス設定**
+
+テスト URL をブラウザで開く:
+```
+（あなたのGAS URL）?action=logSupporter&instagram=test&source=support-gate
+```
+
+- ✅ `{"ok":true}` と表示 → OK
+- ❌ **Google ログイン画面** → アクセス設定が間違っています
+
+**直し方:**
+1. Apps Script → **デプロイ → デプロイを管理**
+2. 鉛筆アイコン → **アクセス: 全員**（匿名ユーザーを含む）
+3. **新バージョン** を選んで **デプロイ**
+4. `Code.gs` が最新版（`logSupporter` 対応）か確認
+
+**Code.gs も更新:**
+- リポジトリの `gas/Code.gs` を Apps Script にコピペしてから再デプロイ
+
+#### 動作確認用 URL の例
+
+```
+https://script.google.com/macros/s/xxxxx/exec?action=logSupporter&instagram=test_user&source=support-gate
+```
+
+`{"ok":true}` が出れば、サイトからも記録されます。
+
 ### 管理画面
 
 - 同じ URL をブラウザで開く → 支援金・現在地を更新
