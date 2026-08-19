@@ -1,20 +1,18 @@
-# GAS 管理画面のセットアップ
-
-スプレッドシートをスマホから簡単に更新するための管理画面です。
+# GAS 管理画面 + 支援者 Instagram 記録
 
 ## 1. Apps Script を開く
 
 1. [Riki クラファンサイト更新](https://docs.google.com/spreadsheets/d/1ZIc7VBcxDCOyj_o3QZ-Yqyk1uzZ61UYjBN0FPhgjQRQ/edit) を開く
 2. **拡張機能 → Apps Script**
 
-## 2. ファイルを追加
+## 2. ファイルを追加・更新
 
 | ファイル名 | 中身 |
 |---|---|
-| `Code.gs` | `gas/Code.gs` をコピペ |
+| `Code.gs` | `gas/Code.gs` をコピペ（上書き） |
 | `Admin`（HTML） | `gas/Admin.html` をコピペ |
 
-HTML ファイルの追加: **＋ → HTML → ファイル名を `Admin` に**
+HTML の追加: **＋ → HTML → ファイル名を `Admin` に**
 
 ## 3. PIN を変更
 
@@ -32,21 +30,44 @@ const ADMIN_PIN = "riki2026"; // ← 自分だけが知っているPINに変更
 4. アクセス: **全員**（匿名ユーザーを含む）
 5. **デプロイ** → URL をコピー
 
-## 5. 使い方
+URL の例:
+```
+https://script.google.com/macros/s/AKfycbxxxxxxxx/exec
+```
 
-- コピーした URL をスマホのホーム画面に追加
-- PIN を入力
-- 支援金・都道府県を選んで **「サイトに反映する」**
-- 公開サイトを再読み込みして確認
+## 5. サイトに URL を設定
 
-## 6. 支援者Instagram記録（任意）
-
-デプロイ URL を `site-data.js` の `supporterLogUrl` に設定すると、
-サイトで Instagram ユーザー名を入力した人が `supporters` シートに記録されます。
+`site-data.js` の `supporterLogUrl` に、**4. でコピーした URL** を入れる:
 
 ```js
-supporterLogUrl: "https://script.google.com/macros/s/xxxxx/exec",
+supporterLogUrl: "https://script.google.com/macros/s/AKfycbxxxxxxxx/exec",
 ```
+
+GitHub に push すると Vercel が再デプロイされます。
+
+## 6. 動作確認
+
+### 支援者 Instagram 記録
+
+1. 公開サイトで Instagram ユーザー名を入力
+2. スプレッドシートに **`supporters`** シートが自動作成される
+3. 1行追加されていれば成功
+
+| 記録日時 | instagram | source |
+|---|---|---|
+| 2026/8/19 15:00:00 | someone_name | support-gate |
+
+### 管理画面
+
+- 同じ URL をブラウザで開く → 支援金・現在地を更新
+
+## 7. コードを更新したとき
+
+Apps Script の `Code.gs` を直したら:
+
+**デプロイ → デプロイを管理 → 鉛筆 → 新バージョン → デプロイ**
+
+サイト側（`supporterLogUrl`）の URL は変わりません。
 
 ## シート構成
 
@@ -59,7 +80,4 @@ supporterLogUrl: "https://script.google.com/macros/s/xxxxx/exec",
 
 ### supporters（自動作成）
 
-| 記録日時 | instagram | source |
-|---|---|---|
-
-支援前に入力された Instagram ユーザー名がここに溜まります。
+支援前に Instagram を入力した人の一覧。**入力した ≠ 支援完了** なので、OFUSE/PayPay の入金と DM で突き合わせてください。

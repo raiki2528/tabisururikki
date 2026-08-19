@@ -37,6 +37,15 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
 
+  if (action === "logsupporter") {
+    try {
+      logSupporter_(e.parameter.instagram, e.parameter.source || "website");
+      return jsonResponse_({ ok: true });
+    } catch (error) {
+      return jsonResponse_({ ok: false, error: String(error.message || error) });
+    }
+  }
+
   return HtmlService.createHtmlOutputFromFile("Admin")
     .setTitle("旅リッキー サイト管理")
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
@@ -58,7 +67,7 @@ function doPost(e) {
       return jsonResponse_({ ok: true, data: getSiteData() });
     }
 
-    if (body.action === "logSupporter") {
+    if (body.action === "logSupporter" || body.instagram) {
       logSupporter_(body.instagram, body.source || "website");
       return jsonResponse_({ ok: true });
     }

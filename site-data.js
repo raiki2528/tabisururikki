@@ -16,6 +16,7 @@ window.SITE_DATA = {
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vSNSfjEYnqttbeO3h0TgX8vqGGCAzNCMEXPDgnVXyq-vuFX71queRfXn1I4FJGlxBVAuEzGU5yVmuWt/pub?gid=0&single=true&output=csv",
   paypayUrl: "https://qr.paypay.ne.jp/p2p01_A1I2BvXzLOKWdlUn",
   paypayQrImage: "./media/paypay-qr.jpg",
+  // GAS Webアプリの URL（デプロイ後に設定）。例: "https://script.google.com/macros/s/xxxxx/exec"
   supporterLogUrl: "",
 
   // 都道府県コード（JIS X 0401）

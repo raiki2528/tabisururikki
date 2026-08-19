@@ -409,15 +409,19 @@ function setSupportUnlocked(unlocked) {
 }
 
 async function logSupporterInstagram(username) {
-  const url = siteData.supporterLogUrl;
-  if (!url) return;
+  const baseUrl = siteData.supporterLogUrl;
+  if (!baseUrl) return;
+
+  const params = new URLSearchParams({
+    action: "logSupporter",
+    instagram: username,
+    source: "support-gate",
+  });
 
   try {
-    await fetch(url, {
-      method: "POST",
+    await fetch(`${baseUrl}?${params.toString()}`, {
+      method: "GET",
       mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ instagram: username, source: "support-gate" }),
     });
   } catch (error) {
     console.warn("支援者ログの送信に失敗しました。", error);
