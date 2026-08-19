@@ -61,10 +61,53 @@ python3 -m http.server 8080
 
 **注意：** QR 画像ファイル自体の差し替えは、スプレッドシートではできません。画像は `media/` フォルダにアップロードし、必要なら `paypayQrImage` のパスだけシートで変更してください。
 
+## Stripe Payment Links の設定
+
+クレジットカード決済は [Stripe Payment Links](https://dashboard.stripe.com/payment-links) を使います。サーバー不要です。
+
+### 1. Stripe でリンクを作成
+
+1. [Stripe ダッシュボード](https://dashboard.stripe.com/) にログイン（テストモードでも可）
+2. **Payment Links → + 新規作成**
+3. 各プランの金額でリンクを作成:
+
+| プラン | 金額 |
+| --- | --- |
+| plan500 | 500円 |
+| plan1000 | 1,000円 |
+| plan3000 | 3,000円 |
+| plan10000 | 10,000円 |
+| plan100000 | 100,000円 |
+
+4. 作成後に表示される URL（`https://buy.stripe.com/...`）をコピー
+
+### 2. site-data.js に貼り付け
+
+```js
+stripePaymentLinks: {
+  default: "https://buy.stripe.com/...",   // ヘッダー用（未設定なら plan3000 を使用）
+  plan500: "https://buy.stripe.com/...",
+  plan1000: "https://buy.stripe.com/...",
+  plan3000: "https://buy.stripe.com/...",
+  plan10000: "https://buy.stripe.com/...",
+  plan100000: "https://buy.stripe.com/...",
+},
+```
+
+GitHub に push すると反映されます。URL が空のボタンは薄く表示されます。
+
+### 3. 支援後の流れ
+
+1. サイトで Instagram ユーザー名を入力
+2. Stripe でカード決済
+3. Instagram DM で「@ユーザー名 です、○○円支援しました」と連絡
+
+Stripe ダッシュボードの **支払い** 一覧でも入金を確認できます。
+
 ## 構成
 
 - `index.html` — ページ本体
 - `styles.css` / `script.js` — デザイン・動作
-- `site-data.js` — 支援額・地図・ギャラリー・PayPay 設定
+- `site-data.js` — 支援額・地図・Stripe・PayPay 設定
 - `pref-data.js` — 日本地図データ
 - `media/` — 写真・動画・PayPay QR

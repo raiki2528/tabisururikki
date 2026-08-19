@@ -493,6 +493,30 @@ function setupSupportGate() {
   }
 }
 
+function setupStripeLinks(data) {
+  const links = data.stripePaymentLinks || {};
+
+  const resolveUrl = (plan) => {
+    const url = links[plan];
+    if (url) return url;
+    if (plan === "default" && links.plan3000) return links.plan3000;
+    return "";
+  };
+
+  document.querySelectorAll("[data-stripe-plan]").forEach((element) => {
+    const url = resolveUrl(element.dataset.stripePlan || "");
+    if (!url) {
+      element.classList.add("is-unconfigured");
+      return;
+    }
+
+    element.href = url;
+    element.target = "_blank";
+    element.rel = "noopener noreferrer";
+    element.classList.remove("is-unconfigured");
+  });
+}
+
 function setupPayPay(data) {
   const block = document.querySelector("[data-paypay-block]");
   const url = data.paypayUrl;
@@ -523,6 +547,7 @@ document.querySelectorAll(".support-link").forEach((link) => {
 
 updateStatus(siteData);
 renderMap(siteData);
+setupStripeLinks(siteData);
 setupPayPay(siteData);
 setupSupportGate();
 loadSheetData();

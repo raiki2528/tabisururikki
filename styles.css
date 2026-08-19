@@ -1163,6 +1163,20 @@ h2 {
   font-size: 0.68rem;
 }
 
+.return-card.premium .button + .button {
+  margin-top: 0.55rem;
+}
+
+.stripe-note {
+  margin: 0.85rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.support-action.is-unconfigured {
+  opacity: 0.55;
+}
+
 .budget {
   border-top: 1px solid var(--line);
 }

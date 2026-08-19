@@ -19,6 +19,17 @@ window.SITE_DATA = {
   supporterLogUrl:
     "https://script.google.com/macros/s/AKfycbw5iNloFyhgWWVWInC5-uxTNNmREu9ABNRO2RbmZGWKVMZEFZztIZKnp8U7qVcMnHNl/exec",
 
+  // Stripe Payment Links（ダッシュボードで作成した URL を貼る）
+  // https://dashboard.stripe.com/payment-links
+  stripePaymentLinks: {
+    default: "", // ヘッダー・モバイルバー（未設定時は plan3000 を使用）
+    plan500: "",
+    plan1000: "",
+    plan3000: "",
+    plan10000: "",
+    plan100000: "",
+  },
+
   // 都道府県コード（JIS X 0401）
   visitedPrefectureCodes: [
     1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
