@@ -24,16 +24,7 @@ window.SITE_DATA = {
   supporterFormAction: "",
   supporterFormEntry: "",
 
-  // Stripe Payment Links（ダッシュボードで作成した URL を貼る）
-  // https://dashboard.stripe.com/payment-links
-  stripePaymentLinks: {
-    default: "", // ヘッダー・モバイルバー（未設定時は plan3000 を使用）
-    plan500: "",
-    plan1000: "",
-    plan3000: "",
-    plan10000: "",
-    plan100000: "",
-  },
+  ofuseUrl: "https://ofuse.me/b738fbb7/letter",
 
   // 都道府県コード（JIS X 0401）
   visitedPrefectureCodes: [
