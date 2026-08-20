@@ -389,10 +389,29 @@ function findPrefectureCode(name) {
 const INSTAGRAM_STORAGE_KEY = "riki_support_instagram";
 
 function normalizeInstagram(value) {
-  return String(value || "")
-    .trim()
+  let normalized = String(value || "").trim();
+  const fromUrl = normalized.match(/(?:instagram\.com\/|instagr\.am\/)([A-Za-z0-9._]+)/i);
+  if (fromUrl) normalized = fromUrl[1];
+
+  return normalized
     .replace(/^@+/, "")
-    .replace(/[^A-Za-z0-9._]/g, "");
+    .replace(/[^A-Za-z0-9._]/g, "")
+    .slice(0, 30);
+}
+
+function showInstagramError(message) {
+  const error = document.querySelector("[data-instagram-error]");
+  if (!error) return;
+  if (message) {
+    error.textContent = message;
+    error.hidden = false;
+    return;
+  }
+  error.hidden = true;
+}
+
+function scrollToSupportPlans() {
+  document.querySelector(".return-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function setSupportUnlocked(unlocked) {
@@ -460,7 +479,8 @@ async function logSupporterInstagram(username) {
   }
 }
 
-function applyInstagramUsername(username) {
+function applyInstagramUsername(username, options = {}) {
+  const { scrollToPlans = false } = options;
   const normalized = normalizeInstagram(username);
   const form = document.querySelector("[data-instagram-form]");
   const success = document.querySelector("[data-instagram-success]");
@@ -472,9 +492,11 @@ function applyInstagramUsername(username) {
     setSupportUnlocked(false);
     form?.removeAttribute("hidden");
     if (success) success.hidden = true;
-    return;
+    showInstagramError("Instagramのユーザー名を入力してください。");
+    return false;
   }
 
+  showInstagramError("");
   sessionStorage.setItem(INSTAGRAM_STORAGE_KEY, normalized);
   if (input) input.value = normalized;
   if (display) display.textContent = `@${normalized}`;
@@ -482,6 +504,8 @@ function applyInstagramUsername(username) {
   form?.setAttribute("hidden", "hidden");
   setSupportUnlocked(true);
   logSupporterInstagram(normalized);
+  if (scrollToPlans) scrollToSupportPlans();
+  return true;
 }
 
 function setupSupportGate() {
@@ -500,19 +524,25 @@ function setupSupportGate() {
     });
   });
 
+  input.addEventListener("input", () => {
+    if (normalizeInstagram(input.value)) showInstagramError("");
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const username = normalizeInstagram(input.value);
     if (!username) {
+      showInstagramError("Instagramのユーザー名を入力してください。");
       input.focus();
       return;
     }
-    applyInstagramUsername(username);
+    applyInstagramUsername(username, { scrollToPlans: true });
   });
 
   changeButton?.addEventListener("click", () => {
     form.removeAttribute("hidden");
     document.querySelector("[data-instagram-success]")?.setAttribute("hidden", "hidden");
+    showInstagramError("");
     setSupportUnlocked(false);
     input.focus();
   });

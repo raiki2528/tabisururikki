@@ -771,6 +771,13 @@ h2 {
   margin: 0 0 0.35rem;
 }
 
+.support-gate-error {
+  margin: 0.45rem 0 0;
+  color: #b45309;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .support-locked-notice {
   margin: -0.5rem 0 1.5rem;
   color: #b45309;

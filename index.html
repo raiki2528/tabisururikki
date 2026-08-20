@@ -295,7 +295,7 @@
           <p class="support-gate-note">
             支援後にリターンをお届けするため、@ユーザー名が必要です。入力するまで支援ボタンは使えません。
           </p>
-          <form class="support-gate-form" data-instagram-form>
+          <form class="support-gate-form" data-instagram-form novalidate>
             <label class="instagram-field">
               <span>Instagram ユーザー名</span>
               <div class="instagram-input-wrap">
@@ -307,12 +307,15 @@
                   autocomplete="username"
                   autocapitalize="off"
                   spellcheck="false"
-                  required
-                  pattern="[A-Za-z0-9._]{1,30}"
+                  inputmode="text"
                   maxlength="30"
+                  aria-describedby="instagram-input-error"
                 />
               </div>
             </label>
+            <p class="support-gate-error" id="instagram-input-error" data-instagram-error hidden>
+              @付きでもOKです。英数字・ピリオド・アンダースコアのみ使えます。
+            </p>
             <button type="submit" class="button button-primary">入力して支援へ進む</button>
           </form>
           <div class="support-gate-success" data-instagram-success hidden>
